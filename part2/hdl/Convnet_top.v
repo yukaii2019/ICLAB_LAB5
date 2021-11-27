@@ -424,7 +424,7 @@ output [CH_NUM*ACT_PER_ADDR-1:0] sram_wordmask_b_n,
 output [5:0] sram_waddr_b_n,
 output [CH_NUM*ACT_PER_ADDR*BW_PER_ACT-1:0] sram_wdata_b_n,
 output [9:0] sram_raddr_weight_n,
-output reg [5:0] sram_raddr_bias_n
+output [5:0] sram_raddr_bias_n
 
 
 );
@@ -436,7 +436,7 @@ localparam [3:0] CAL = 3;
 localparam [3:0] FINISH = 4;
 
 reg [3:0] state, state_n;
-reg [3:0] feature_map_cnt, feature_map_cnt_n;
+//reg [3:0] feature_map_cnt, feature_map_cnt_n;
 reg [1:0] in_cnt, in_cnt_n;
 reg [1:0] ker_cnt, ker_cnt_n;
 
@@ -482,6 +482,9 @@ wire [2:0]x_2_delay_test = x_2_delay[5];
 wire [2:0]y_2_delay_test = y_2_delay[5];
 
 wire [11:0] out[0:3];
+
+reg [1:0] wordmask_cnt, wordmask_cnt_n;
+reg [2:0] bias_cnt, bias_cnt_n;
 
 integer i, j;
 
@@ -680,28 +683,47 @@ assign sram_wen_b1_n = (in_cnt == 1)? ~(x[0]==1 & y[0]==0):1;
 assign sram_wen_b2_n = (in_cnt == 1)? ~(x[0]==0 & y[0]==1):1;
 assign sram_wen_b3_n = (in_cnt == 1)? ~(x[0]==1 & y[0]==1):1;
 
-assign sram_wordmask_b_n[ 0] = ~(feature_map_cnt[3:2] == 3); 
-assign sram_wordmask_b_n[ 1] = ~(feature_map_cnt[3:2] == 3); 
-assign sram_wordmask_b_n[ 2] = ~(feature_map_cnt[3:2] == 3); 
-assign sram_wordmask_b_n[ 3] = ~(feature_map_cnt[3:2] == 3); 
-assign sram_wordmask_b_n[ 4] = ~(feature_map_cnt[3:2] == 2); 
-assign sram_wordmask_b_n[ 5] = ~(feature_map_cnt[3:2] == 2); 
-assign sram_wordmask_b_n[ 6] = ~(feature_map_cnt[3:2] == 2); 
-assign sram_wordmask_b_n[ 7] = ~(feature_map_cnt[3:2] == 2); 
-assign sram_wordmask_b_n[ 8] = ~(feature_map_cnt[3:2] == 1); 
-assign sram_wordmask_b_n[ 9] = ~(feature_map_cnt[3:2] == 1); 
-assign sram_wordmask_b_n[10] = ~(feature_map_cnt[3:2] == 1); 
-assign sram_wordmask_b_n[11] = ~(feature_map_cnt[3:2] == 1); 
-assign sram_wordmask_b_n[12] = ~(feature_map_cnt[3:2] == 0); 
-assign sram_wordmask_b_n[13] = ~(feature_map_cnt[3:2] == 0); 
-assign sram_wordmask_b_n[14] = ~(feature_map_cnt[3:2] == 0); 
-assign sram_wordmask_b_n[15] = ~(feature_map_cnt[3:2] == 0); 
+//assign sram_wordmask_b_n[ 0] = ~(feature_map_cnt[3:2] == 3); 
+//assign sram_wordmask_b_n[ 1] = ~(feature_map_cnt[3:2] == 3); 
+//assign sram_wordmask_b_n[ 2] = ~(feature_map_cnt[3:2] == 3); 
+//assign sram_wordmask_b_n[ 3] = ~(feature_map_cnt[3:2] == 3); 
+//assign sram_wordmask_b_n[ 4] = ~(feature_map_cnt[3:2] == 2); 
+//assign sram_wordmask_b_n[ 5] = ~(feature_map_cnt[3:2] == 2); 
+//assign sram_wordmask_b_n[ 6] = ~(feature_map_cnt[3:2] == 2); 
+//assign sram_wordmask_b_n[ 7] = ~(feature_map_cnt[3:2] == 2); 
+//assign sram_wordmask_b_n[ 8] = ~(feature_map_cnt[3:2] == 1); 
+//assign sram_wordmask_b_n[ 9] = ~(feature_map_cnt[3:2] == 1); 
+//assign sram_wordmask_b_n[10] = ~(feature_map_cnt[3:2] == 1); 
+//assign sram_wordmask_b_n[11] = ~(feature_map_cnt[3:2] == 1); 
+//assign sram_wordmask_b_n[12] = ~(feature_map_cnt[3:2] == 0); 
+//assign sram_wordmask_b_n[13] = ~(feature_map_cnt[3:2] == 0); 
+//assign sram_wordmask_b_n[14] = ~(feature_map_cnt[3:2] == 0); 
+//assign sram_wordmask_b_n[15] = ~(feature_map_cnt[3:2] == 0); 
+
+assign sram_wordmask_b_n[ 0] = ~(wordmask_cnt == 3); 
+assign sram_wordmask_b_n[ 1] = ~(wordmask_cnt == 3); 
+assign sram_wordmask_b_n[ 2] = ~(wordmask_cnt == 3); 
+assign sram_wordmask_b_n[ 3] = ~(wordmask_cnt == 3); 
+assign sram_wordmask_b_n[ 4] = ~(wordmask_cnt == 2); 
+assign sram_wordmask_b_n[ 5] = ~(wordmask_cnt == 2); 
+assign sram_wordmask_b_n[ 6] = ~(wordmask_cnt == 2); 
+assign sram_wordmask_b_n[ 7] = ~(wordmask_cnt == 2); 
+assign sram_wordmask_b_n[ 8] = ~(wordmask_cnt == 1); 
+assign sram_wordmask_b_n[ 9] = ~(wordmask_cnt == 1); 
+assign sram_wordmask_b_n[10] = ~(wordmask_cnt == 1); 
+assign sram_wordmask_b_n[11] = ~(wordmask_cnt == 1); 
+assign sram_wordmask_b_n[12] = ~(wordmask_cnt == 0); 
+assign sram_wordmask_b_n[13] = ~(wordmask_cnt == 0); 
+assign sram_wordmask_b_n[14] = ~(wordmask_cnt == 0); 
+assign sram_wordmask_b_n[15] = ~(wordmask_cnt == 0); 
 
 assign sram_waddr_b_n = y[2:1]*6 + x[2:1];
 
 
 
-assign sram_raddr_weight_n = feature_map_cnt + ker_cnt;
+//assign sram_raddr_weight_n = feature_map_cnt + ker_cnt;
+assign sram_raddr_weight_n = bias_cnt * 4 + ker_cnt;
+assign sram_raddr_bias_n= bias_cnt;
 
 always@(posedge clk)begin
     if(~rst_n)begin
@@ -713,7 +735,7 @@ always@(posedge clk)begin
 end
 
 always@(posedge clk)begin
-    feature_map_cnt <= feature_map_cnt_n;
+    //feature_map_cnt <= feature_map_cnt_n;
     ker_cnt <= ker_cnt_n;
     in_cnt <= in_cnt_n;
     x <= x_n;
@@ -734,6 +756,9 @@ always@(posedge clk)begin
     y_2_delay[3] <= y_2_delay[2];
     y_2_delay[4] <= y_2_delay[3];
     y_2_delay[5] <= y_2_delay[4];
+
+    wordmask_cnt <= wordmask_cnt_n;
+    bias_cnt <= bias_cnt_n;
 end
 
 always@(*)begin
@@ -745,8 +770,8 @@ always@(*)begin
             sram_raddr_a1_n = 0;
             sram_raddr_a2_n = 0;
             sram_raddr_a3_n = 0;
-            sram_raddr_bias_n = 0;
-            feature_map_cnt_n = 0;
+            bias_cnt_n = 0;
+            //feature_map_cnt_n = 0;
             ker_cnt_n = 0;
             in_cnt_n = (part2_en)? in_cnt - 1 : 2;
             x_n = 7;
@@ -754,6 +779,8 @@ always@(*)begin
 
             x_2_n = (part2_en) ? 1 : 0;
             y_2_n = 0; 
+
+            wordmask_cnt_n = 0;
         end
         BLANK_1:begin
             state_n = BLANK_2;
@@ -762,8 +789,8 @@ always@(*)begin
             sram_raddr_a1_n = 0;
             sram_raddr_a2_n = 0;
             sram_raddr_a3_n = 0;
-            sram_raddr_bias_n = 0;
-            feature_map_cnt_n = 0;
+            bias_cnt_n = 0;
+            //feature_map_cnt_n = 0;
             ker_cnt_n = ker_cnt+1;
             in_cnt_n = in_cnt - 1;
             x_n = 7;
@@ -771,6 +798,8 @@ always@(*)begin
             
             x_2_n = 1;
             y_2_n = 0; 
+
+            wordmask_cnt_n = 0;
         end
         BLANK_2:begin
             state_n = CAL;
@@ -779,8 +808,8 @@ always@(*)begin
             sram_raddr_a1_n = 0;
             sram_raddr_a2_n = 0;
             sram_raddr_a3_n = 0;
-            sram_raddr_bias_n = 0;
-            feature_map_cnt_n = 0;
+            bias_cnt_n = 0;
+            //feature_map_cnt_n = 0;
             ker_cnt_n = ker_cnt + 1;
             in_cnt_n = in_cnt - 1;
             x_n = 7;
@@ -789,25 +818,32 @@ always@(*)begin
 
             x_2_n = 1;
             y_2_n = 0;
+
+            wordmask_cnt_n = 0;
         end
         CAL:begin
-            state_n = (x_2 == 2 && y_2 == 6)? FINISH :  CAL;
+            state_n = (x_2 == 2 && y_2 == 0 && bias_cnt == 4)? FINISH :  CAL;
+            //state_n = CAL;
             valid_n = 0;
 
             sram_raddr_a0_n = (in_cnt == 2) ? x_2[2:1] + x_2[0] + (y_2[2:1] + y_2[0]) * 6 : sram_raddr_a0;
             sram_raddr_a1_n = (in_cnt == 2) ? x_2[2:1]          + (y_2[2:1] + y_2[0]) * 6 : sram_raddr_a1;
             sram_raddr_a2_n = (in_cnt == 2) ? x_2[2:1] + x_2[0] + y_2[2:1] * 6 : sram_raddr_a2;
             sram_raddr_a3_n = (in_cnt == 2) ? x_2[2:1]          + y_2[2:1] * 6 : sram_raddr_a3;
-            sram_raddr_bias_n = 0;
-            feature_map_cnt_n = 0;
+        
+            bias_cnt_n = (in_cnt == 2 && x_2 == 0 && y_2 == 0)? bias_cnt + 1 : bias_cnt ; 
+            //feature_map_cnt_n = (in_cnt == 2 && x_2 == 0 && y_2 == 0) ? feature_map_cnt + 4 : feature_map_cnt;
+            
             ker_cnt_n = ker_cnt + 1;
             in_cnt_n = in_cnt - 1;
             x_n = (in_cnt == 1) ? (x != 5)? x+1 : 0 :x;
-            y_n = (x == 5 & in_cnt == 1) ? y+1: y;
+            y_n = (x == 5 & in_cnt == 1) ? (y != 5)? y+1 : 0 : y;
             
 
             x_2_n = (in_cnt == 2) ? (x_2 != 5)? x_2+1 : 0 : x_2;
-            y_2_n = (in_cnt == 2 && x_2 == 5)? y_2+1 : y_2;
+            y_2_n = (in_cnt == 2 && x_2 == 5)? (y_2 != 5)? y_2+1 : 0  : y_2;
+
+            wordmask_cnt_n = (in_cnt == 1 && x == 5 && y == 5)? wordmask_cnt + 1 : wordmask_cnt;
         end
         FINISH:begin
             state_n = FINISH;
@@ -817,8 +853,8 @@ always@(*)begin
             sram_raddr_a1_n = 0;
             sram_raddr_a2_n = 0;
             sram_raddr_a3_n = 0;
-            sram_raddr_bias_n = 0;
-            feature_map_cnt_n = 0;
+            bias_cnt_n = 0;
+            //feature_map_cnt_n = 0;
             ker_cnt_n = 0;
             in_cnt_n = 0;
             x_n = 0;
@@ -827,6 +863,8 @@ always@(*)begin
 
             x_2_n = 0;
             y_2_n = 0;
+
+            wordmask_cnt_n = 0;
 
 
         end
