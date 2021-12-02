@@ -813,10 +813,15 @@ always@(posedge clk)begin
         sum2[3] <= (in_cnt != 1) ? sum[3]+sum2[3]:sum[3] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
     end
     else begin
-        sum2[0] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[0]+sum2[0] : sum[0] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
-        sum2[1] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[1]+sum2[1] : sum[1] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
-        sum2[2] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[2]+sum2[2] : sum[2] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
-        sum2[3] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[3]+sum2[3] : sum[3] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
+        //sum2[0] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[0]+sum2[0] : sum[0] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
+        //sum2[1] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[1]+sum2[1] : sum[1] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
+        //sum2[2] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[2]+sum2[2] : sum[2] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
+        //sum2[3] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[3]+sum2[3] : sum[3] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
+        
+        sum2[0] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[0]+sum2[0] : sum[0] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0};
+        sum2[1] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[1]+sum2[1] : sum[1] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0};
+        sum2[2] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[2]+sum2[2] : sum[2] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0};
+        sum2[3] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[3]+sum2[3] : sum[3] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0};
         
         //sum2[0] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum2[0]+1 : 0;
         //sum2[1] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum2[1]+1 : 0;
@@ -830,10 +835,10 @@ assign out_ReLU[1] = (sum2[1][19+s] != 1) ? sum2[1] : 0;
 assign out_ReLU[2] = (sum2[2][19+s] != 1) ? sum2[2] : 0;
 assign out_ReLU[3] = (sum2[3][19+s] != 1) ? sum2[3] : 0;
 
-assign out[0] = (out_ReLU[0][19+s-1:18] >= 1)? 2047 : out_ReLU[0][7 +: 12];
-assign out[1] = (out_ReLU[1][19+s-1:18] >= 1)? 2047 : out_ReLU[1][7 +: 12];
-assign out[2] = (out_ReLU[2][19+s-1:18] >= 1)? 2047 : out_ReLU[2][7 +: 12];
-assign out[3] = (out_ReLU[3][19+s-1:18] >= 1)? 2047 : out_ReLU[3][7 +: 12];
+assign out[0] = (out_ReLU[0][19+s-1:18] >= 1)? 2047 : out_ReLU[0][7 +: 12] + 2'b1000000;
+assign out[1] = (out_ReLU[1][19+s-1:18] >= 1)? 2047 : out_ReLU[1][7 +: 12] + 2'b1000000;
+assign out[2] = (out_ReLU[2][19+s-1:18] >= 1)? 2047 : out_ReLU[2][7 +: 12] + 2'b1000000;
+assign out[3] = (out_ReLU[3][19+s-1:18] >= 1)? 2047 : out_ReLU[3][7 +: 12] + 2'b1000000;
 
 
 assign out_sum_new = {{2{out_ReLU[0][19+s]}},out_ReLU[0]} + {{2{out_ReLU[1][19+s]}},out_ReLU[1]} + {{2{out_ReLU[2][19+s]}},out_ReLU[2]} + {{2{out_ReLU[3][19+s]}},out_ReLU[3]} + 9'b1_0000_0000 ;
