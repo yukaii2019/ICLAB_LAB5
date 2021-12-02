@@ -60,12 +60,12 @@ output reg [CH_NUM*ACT_PER_ADDR*BW_PER_ACT-1:0] sram_wdata_b
 );
 
 
-localparam [3:0] PART1 = 0;
-localparam [3:0] PART2 = 1;
-localparam [3:0] CONV2 = 2;
-localparam [3:0] CONV3_POOL = 3;
+localparam [1:0] PART1 = 0;
+localparam [1:0] PART2 = 1;
+localparam [1:0] CONV2 = 2;
+localparam [1:0] CONV3_POOL = 3;
 
-reg [3:0] state, state_n;
+reg [1:0] state, state_n;
 
 reg rst_n_d;
 reg enable_d;
@@ -89,7 +89,6 @@ wire [CH_NUM*ACT_PER_ADDR*BW_PER_ACT-1:0] sram_wdata_b_n;
 
 
 wire [5:0] sram_raddr_a0_n,sram_raddr_a1_n, sram_raddr_a2_n, sram_raddr_a3_n;
-//wire [5:0] sram_raddr_b0_n,sram_raddr_b1_n, sram_raddr_b2_n, sram_raddr_b3_n;
 wire [9:0] sram_raddr_weight_n;
 wire [5:0] sram_raddr_bias_n;
 
@@ -108,9 +107,6 @@ wire conv3;
 
 assign conv2 = (state == CONV2) ? 1:0;
 assign conv3 = (state == CONV3_POOL) ? 1:0;
-
-
-//wire[11:0] test = sram_wdata_a [11:0];
 
 /* ===========output reg ===================*/
 always@(posedge clk)begin
@@ -165,10 +161,6 @@ always@(posedge clk)begin
     rst_n_d <= rst_n;
     enable_d <= enable;
     input_data_d <= input_data;
-    //sram_rdata_a0_d <= (state == PART2) ? sram_rdata_a0 : sram_rdata_b0;
-    //sram_rdata_a1_d <= (state == PART2) ? sram_rdata_a1 : sram_rdata_b1;
-    //sram_rdata_a2_d <= (state == PART2) ? sram_rdata_a2 : sram_rdata_b2;
-    //sram_rdata_a3_d <= (state == PART2) ? sram_rdata_a3 : sram_rdata_b3;
     sram_rdata_weight_d <= sram_rdata_weight;
     sram_rdata_bias_d <= sram_rdata_bias;
 end
@@ -473,17 +465,18 @@ output [5:0] sram_raddr_bias_n
 
 
 );
-localparam [3:0] IDLE = 0;
-localparam [3:0] BLANK_1 = 1;
-localparam [3:0] BLANK_2 = 2;
-localparam [3:0] CAL = 3;
-localparam [3:0] FINISH = 4;
-localparam [3:0] RESET = 5;
+localparam [2:0] IDLE = 0;
+localparam [2:0] BLANK_1 = 1;
+localparam [2:0] BLANK_2 = 2;
+localparam [2:0] CAL = 3;
+localparam [2:0] FINISH = 4;
+localparam [2:0] RESET = 5;
 
 
 parameter s = 7;
+//parameter s = 0;
 
-reg [3:0] state, state_n;
+reg [2:0] state, state_n;
 reg [1:0] in_cnt, in_cnt_n;
 reg [3:0] ker_cnt, ker_cnt_n;
 
@@ -506,9 +499,6 @@ reg [19:0] buf_3_2[0:8];
 
 wire [19+s:0] sum [0:3];
 reg [19+s:0] sum2 [0:3];
-
-//wire [19:0] sum [0:3];
-//reg [19:0] sum2 [0:3];
 
 wire [19:0] weight [0:8];
 
@@ -533,7 +523,6 @@ reg [2:0] y_4_delay[0:5];
 
 wire [11:0] data [0:3];
 
-//reg [CH_NUM*ACT_PER_ADDR*BW_PER_ACT-1:0] left_up, right_up, left_down, right_down;
 reg [47:0] left_up, right_up, left_down, right_down;
 
 wire [2:0]x_2_delay_test;
@@ -566,8 +555,6 @@ wire [1:0] tmp;
 
 reg [1:0] depth_cnt, depth_cnt_n;
 
-
-//wire [13:0] out_sum;
 
 wire [19+s:0] out_ReLU[0:3];
 wire [21+s:0] out_sum_new;
@@ -671,19 +658,8 @@ always@(*)begin
         endcase
     end
 
-//    left_up    = (x_2_delay[5][0] == 0 && y_2_delay[5][0]==0)? one_layer_a0 : (x_2_delay[5][0] == 1 && y_2_delay[5][0]==0) ? one_layer_a1 : (x_2_delay[5][0] == 0 && y_2_delay[5][0] == 1)? one_layer_a2 : one_layer_a3;
-//    right_up   = (x_2_delay[5][0] == 0 && y_2_delay[5][0]==0)? one_layer_a1 : (x_2_delay[5][0] == 1 && y_2_delay[5][0]==0) ? one_layer_a0 : (x_2_delay[5][0] == 0 && y_2_delay[5][0] == 1)? one_layer_a3 : one_layer_a2;
-//    left_down  = (x_2_delay[5][0] == 0 && y_2_delay[5][0]==0)? one_layer_a2 : (x_2_delay[5][0] == 1 && y_2_delay[5][0]==0) ? one_layer_a3 : (x_2_delay[5][0] == 0 && y_2_delay[5][0] == 1)? one_layer_a0 : one_layer_a1;
-//    right_down = (x_2_delay[5][0] == 0 && y_2_delay[5][0]==0)? one_layer_a3 : (x_2_delay[5][0] == 1 && y_2_delay[5][0]==0) ? one_layer_a2 : (x_2_delay[5][0] == 0 && y_2_delay[5][0] == 1)? one_layer_a1 : one_layer_a0;
 end
 
-
-//always@(*)begin
-//    left_up    = (x_2_delay[5][0] == 0 && y_2_delay[5][0]==0)? sram_rdata_a0_d : (x_2_delay[5][0] == 1 && y_2_delay[5][0]==0) ? sram_rdata_a1_d : (x_2_delay[5][0] == 0 && y_2_delay[5][0] == 1)? sram_rdata_a2_d : sram_rdata_a3_d;
-//    right_up   = (x_2_delay[5][0] == 0 && y_2_delay[5][0]==0)? sram_rdata_a1_d : (x_2_delay[5][0] == 1 && y_2_delay[5][0]==0) ? sram_rdata_a0_d : (x_2_delay[5][0] == 0 && y_2_delay[5][0] == 1)? sram_rdata_a3_d : sram_rdata_a2_d;
-//    left_down  = (x_2_delay[5][0] == 0 && y_2_delay[5][0]==0)? sram_rdata_a2_d : (x_2_delay[5][0] == 1 && y_2_delay[5][0]==0) ? sram_rdata_a3_d : (x_2_delay[5][0] == 0 && y_2_delay[5][0] == 1)? sram_rdata_a0_d : sram_rdata_a1_d;
-//    right_down = (x_2_delay[5][0] == 0 && y_2_delay[5][0]==0)? sram_rdata_a3_d : (x_2_delay[5][0] == 1 && y_2_delay[5][0]==0) ? sram_rdata_a2_d : (x_2_delay[5][0] == 0 && y_2_delay[5][0] == 1)? sram_rdata_a1_d : sram_rdata_a0_d;
-//end
 
 assign pos[ 0] = left_up   [36 +: 12];
 assign pos[ 1] = left_up   [24 +: 12];
@@ -702,30 +678,11 @@ assign pos[13] = left_down [ 0 +: 12];
 assign pos[14] = right_down[12 +: 12];
 assign pos[15] = right_down[ 0 +: 12];
 
-//assign pos[ 0] = left_up   [(in_cnt)*48 + 36 +: 12];
-//assign pos[ 1] = left_up   [(in_cnt)*48 + 24 +: 12];
-//assign pos[ 2] = right_up  [(in_cnt)*48 + 36 +: 12];
-//assign pos[ 3] = right_up  [(in_cnt)*48 + 24 +: 12];
-//assign pos[ 4] = left_up   [(in_cnt)*48 + 12 +: 12];
-//assign pos[ 5] = left_up   [(in_cnt)*48 +  0 +: 12];
-//assign pos[ 6] = right_up  [(in_cnt)*48 + 12 +: 12];
-//assign pos[ 7] = right_up  [(in_cnt)*48 +  0 +: 12];
-//assign pos[ 8] = left_down [(in_cnt)*48 + 36 +: 12];
-//assign pos[ 9] = left_down [(in_cnt)*48 + 24 +: 12];
-//assign pos[10] = right_down[(in_cnt)*48 + 36 +: 12];
-//assign pos[11] = right_down[(in_cnt)*48 + 24 +: 12];
-//assign pos[12] = left_down [(in_cnt)*48 + 12 +: 12];
-//assign pos[13] = left_down [(in_cnt)*48 +  0 +: 12];
-//assign pos[14] = right_down[(in_cnt)*48 + 12 +: 12];
-//assign pos[15] = right_down[(in_cnt)*48 +  0 +: 12];
-
 always@(posedge clk)begin
     for( i = 0 ; i < 16 ; i = i + 1)begin
         pos2[i] <= pos[i]; 
     end
 end
-
-
 
 assign buf_0[0] = {{12{sram_rdata_weight_d[BW_PER_PARAM * (WEIGHT_PER_ADDR-0) - 1]}},sram_rdata_weight_d[BW_PER_PARAM * (WEIGHT_PER_ADDR-0) - 1 -: 8]} * {{8{pos2[0][BW_PER_ACT-1]}},  pos2[0]};
 assign buf_0[1] = {{12{sram_rdata_weight_d[BW_PER_PARAM * (WEIGHT_PER_ADDR-1) - 1]}},sram_rdata_weight_d[BW_PER_PARAM * (WEIGHT_PER_ADDR-1) - 1 -: 8]} * {{8{pos2[1][BW_PER_ACT-1]}},  pos2[1]};
@@ -792,11 +749,6 @@ always@(posedge clk)begin
     end
 end
 
-//assign sum[0] = buf_0_2[0] + buf_0_2[1] + buf_0_2[2] + buf_0_2[3] + buf_0_2[4] + buf_0_2[5] + buf_0_2[6] + buf_0_2[7] + buf_0_2[8]; 
-//assign sum[1] = buf_1_2[0] + buf_1_2[1] + buf_1_2[2] + buf_1_2[3] + buf_1_2[4] + buf_1_2[5] + buf_1_2[6] + buf_1_2[7] + buf_1_2[8]; 
-//assign sum[2] = buf_2_2[0] + buf_2_2[1] + buf_2_2[2] + buf_2_2[3] + buf_2_2[4] + buf_2_2[5] + buf_2_2[6] + buf_2_2[7] + buf_2_2[8]; 
-//assign sum[3] = buf_3_2[0] + buf_3_2[1] + buf_3_2[2] + buf_3_2[3] + buf_3_2[4] + buf_3_2[5] + buf_3_2[6] + buf_3_2[7] + buf_3_2[8]; 
-
 assign sum[0] = {{s{buf_0_2[0][19]}}, buf_0_2[0]} + {{s{buf_0_2[1][19]}}, buf_0_2[1]} + {{s{buf_0_2[2][19]}}, buf_0_2[2]} + {{s{buf_0_2[3][19]}}, buf_0_2[3]} + {{s{buf_0_2[4][19]}}, buf_0_2[4]} + {{s{buf_0_2[5][19]}}, buf_0_2[5]} + {{s{buf_0_2[6][19]}}, buf_0_2[6]} + {{s{buf_0_2[7][19]}}, buf_0_2[7]} + {{s{buf_0_2[8][19]}}, buf_0_2[8]};
 
 assign sum[1] = {{s{buf_1_2[0][19]}}, buf_1_2[0]} + {{s{buf_1_2[1][19]}}, buf_1_2[1]} + {{s{buf_1_2[2][19]}}, buf_1_2[2]} + {{s{buf_1_2[3][19]}}, buf_1_2[3]} + {{s{buf_1_2[4][19]}}, buf_1_2[4]} + {{s{buf_1_2[5][19]}}, buf_1_2[5]} + {{s{buf_1_2[6][19]}}, buf_1_2[6]} + {{s{buf_1_2[7][19]}}, buf_1_2[7]} + {{s{buf_1_2[8][19]}}, buf_1_2[8]};
@@ -813,20 +765,10 @@ always@(posedge clk)begin
         sum2[3] <= (in_cnt != 1) ? sum[3]+sum2[3]:sum[3] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
     end
     else begin
-        //sum2[0] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[0]+sum2[0] : sum[0] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
-        //sum2[1] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[1]+sum2[1] : sum[1] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
-        //sum2[2] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[2]+sum2[2] : sum[2] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
-        //sum2[3] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[3]+sum2[3] : sum[3] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0} + 64;
-        
         sum2[0] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[0]+sum2[0] : sum[0] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0};
         sum2[1] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[1]+sum2[1] : sum[1] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0};
         sum2[2] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[2]+sum2[2] : sum[2] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0};
         sum2[3] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum[3]+sum2[3] : sum[3] + {{(4+s){sram_rdata_bias_d[7]}},sram_rdata_bias_d, 8'd0};
-        
-        //sum2[0] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum2[0]+1 : 0;
-        //sum2[1] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum2[1]+1 : 0;
-        //sum2[2] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum2[2]+1 : 0;
-        //sum2[3] <= (~(in_cnt == 1 && depth_cnt == 1)) ? sum2[3]+1 : 0;
     end
 end
 
@@ -835,23 +777,15 @@ assign out_ReLU[1] = (sum2[1][19+s] != 1) ? sum2[1] : 0;
 assign out_ReLU[2] = (sum2[2][19+s] != 1) ? sum2[2] : 0;
 assign out_ReLU[3] = (sum2[3][19+s] != 1) ? sum2[3] : 0;
 
-assign out[0] = (out_ReLU[0][19+s-1:18] >= 1)? 2047 : out_ReLU[0][7 +: 12] + 2'b1000000;
-assign out[1] = (out_ReLU[1][19+s-1:18] >= 1)? 2047 : out_ReLU[1][7 +: 12] + 2'b1000000;
-assign out[2] = (out_ReLU[2][19+s-1:18] >= 1)? 2047 : out_ReLU[2][7 +: 12] + 2'b1000000;
-assign out[3] = (out_ReLU[3][19+s-1:18] >= 1)? 2047 : out_ReLU[3][7 +: 12] + 2'b1000000;
+assign out[0] = (out_ReLU[0][19+s-1:18] >= 1)? 2047 : out_ReLU[0][7 +: 12];
+assign out[1] = (out_ReLU[1][19+s-1:18] >= 1)? 2047 : out_ReLU[1][7 +: 12];
+assign out[2] = (out_ReLU[2][19+s-1:18] >= 1)? 2047 : out_ReLU[2][7 +: 12];
+assign out[3] = (out_ReLU[3][19+s-1:18] >= 1)? 2047 : out_ReLU[3][7 +: 12];
 
 
 assign out_sum_new = {{2{out_ReLU[0][19+s]}},out_ReLU[0]} + {{2{out_ReLU[1][19+s]}},out_ReLU[1]} + {{2{out_ReLU[2][19+s]}},out_ReLU[2]} + {{2{out_ReLU[3][19+s]}},out_ReLU[3]} + 9'b1_0000_0000 ;
 
 assign out_pool = (out_sum_new[21+s:20] >= 1)? 2047 : out_sum_new[9 +: 12];
-
-
-//assign out[0] = (sum2[0][19+s] != 1)? (sum2[0][19+s-1:18] >= 1) ? 2047 : sum2[0][7 +: 12]:0;
-//assign out[1] = (sum2[1][19+s] != 1)? (sum2[1][19+s-1:18] >= 1) ? 2047 : sum2[1][7 +: 12]:0;
-//assign out[2] = (sum2[2][19+s] != 1)? (sum2[2][19+s-1:18] >= 1) ? 2047 : sum2[2][7 +: 12]:0;
-//assign out[3] = (sum2[3][19+s] != 1)? (sum2[3][19+s-1:18] >= 1) ? 2047 : sum2[3][7 +: 12]:0;
-
-//assign out_sum = {{2{out[0][11]}},out[0]} + {{2{out[1][11]}},out[1]} + {{2{out[2][11]}},out[2]} + {{2{out[3][11]}},out[3]} + 2'b10;
 
 
 assign sram_wdata_b_n[3*48 + 36 +: 12] = (conv3 == 0) ? out[0] : out_pool;
@@ -872,26 +806,6 @@ assign sram_wdata_b_n[0*48 + 12 +: 12] = (conv3 == 0) ? out[2] : out_pool;
 assign sram_wdata_b_n[0*48 +  0 +: 12] = (conv3 == 0) ? out[3] : out_pool;
 
 
-//assign sram_wdata_b_n[3*48 + 36 +: 12] = (conv3 == 0) ? out[0] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[3*48 + 24 +: 12] = (conv3 == 0) ? out[1] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[3*48 + 12 +: 12] = (conv3 == 0) ? out[2] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[3*48 +  0 +: 12] = (conv3 == 0) ? out[3] : out_sum[13 -: 12];
-//
-//assign sram_wdata_b_n[2*48 + 36 +: 12] = (conv3 == 0) ? out[0] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[2*48 + 24 +: 12] = (conv3 == 0) ? out[1] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[2*48 + 12 +: 12] = (conv3 == 0) ? out[2] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[2*48 +  0 +: 12] = (conv3 == 0) ? out[3] : out_sum[13 -: 12];
-//
-//assign sram_wdata_b_n[1*48 + 36 +: 12] = (conv3 == 0) ? out[0] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[1*48 + 24 +: 12] = (conv3 == 0) ? out[1] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[1*48 + 12 +: 12] = (conv3 == 0) ? out[2] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[1*48 +  0 +: 12] = (conv3 == 0) ? out[3] : out_sum[13 -: 12];
-//
-//assign sram_wdata_b_n[0*48 + 36 +: 12] = (conv3 == 0) ? out[0] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[0*48 + 24 +: 12] = (conv3 == 0) ? out[1] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[0*48 + 12 +: 12] = (conv3 == 0) ? out[2] : out_sum[13 -: 12];
-//assign sram_wdata_b_n[0*48 +  0 +: 12] = (conv3 == 0) ? out[3] : out_sum[13 -: 12];
-
 always@(*)begin
     if(!conv3)begin
         sram_wen_b0_n = (in_cnt == 1)? ~(x[0]==0 & y[0]==0):1;
@@ -904,17 +818,8 @@ always@(*)begin
         sram_wen_b1_n = (in_cnt == 1 && depth_cnt == 1)? ~(x_3[2:1]==1 & y_3[2:1]==0):1;
         sram_wen_b2_n = (in_cnt == 1 && depth_cnt == 1)? ~(x_3[2:1]==0 & y_3[2:1]==1):1;
         sram_wen_b3_n = (in_cnt == 1 && depth_cnt == 1)? ~(x_3[2:1]==1 & y_3[2:1]==1):1;
-        //sram_wen_b0_n = (in_cnt == 1)? ~(x_3[2:1]==0 & y_3[2:1]==0):1;
-        //sram_wen_b1_n = (in_cnt == 1)? ~(x_3[2:1]==1 & y_3[2:1]==0):1;
-        //sram_wen_b2_n = (in_cnt == 1)? ~(x_3[2:1]==0 & y_3[2:1]==1):1;
-        //sram_wen_b3_n = (in_cnt == 1)? ~(x_3[2:1]==1 & y_3[2:1]==1):1;
     end
 end
-
-//assign sram_wen_b0_n = (in_cnt == 1)? ~(x[0]==0 & y[0]==0):1;
-//assign sram_wen_b1_n = (in_cnt == 1)? ~(x[0]==1 & y[0]==0):1;
-//assign sram_wen_b2_n = (in_cnt == 1)? ~(x[0]==0 & y[0]==1):1;
-//assign sram_wen_b3_n = (in_cnt == 1)? ~(x[0]==1 & y[0]==1):1;
 
 assign sram_wordmask_b_n[ 0] = (!conv3 ) ? ~(wordmask_cnt == 3) : (layer[1:0] == 3 && x_3[0] == 1 && y_3[0] == 1) ? 0 : 1; 
 assign sram_wordmask_b_n[ 1] = (!conv3 ) ? ~(wordmask_cnt == 3) : (layer[1:0] == 3 && x_3[0] == 0 && y_3[0] == 1) ? 0 : 1; 
@@ -934,11 +839,9 @@ assign sram_wordmask_b_n[14] = (!conv3 ) ? ~(wordmask_cnt == 0) : (layer[1:0] ==
 assign sram_wordmask_b_n[15] = (!conv3 ) ? ~(wordmask_cnt == 0) : (layer[1:0] == 0 && x_3[0] == 0 && y_3[0] == 0) ? 0 : 1; 
 
 assign sram_waddr_b_n = (!conv3) ? y[2:1]*6 + x[2:1] + waddr_shift : layer[5:2];
-
-
 assign sram_raddr_weight_n = (!conv3) ?  bias_cnt * 4 + ker_cnt : (bias_cnt-16)*12 + ker_cnt + 64;
-
 assign sram_raddr_bias_n = bias_cnt;
+
 
 always@(posedge clk)begin
     if(~rst_n)begin
@@ -1105,11 +1008,9 @@ always@(*)begin
             x_n = 7;
             y_n = 0;
             x_2_n = (part2_en) ? 1 : 0;
-            y_2_n = 0; 
-            
+            y_2_n = 0;         
             x_3_n = 7;
             y_3_n = 0;
-
             x_4_n = 0;
             y_4_n = 0;
 
@@ -1126,14 +1027,11 @@ always@(*)begin
             bias_cnt_n = bias_cnt;
             
             x_n = 7;
-            y_n = 0;
-            
+            y_n = 0; 
             x_2_n = 1;
             y_2_n = 0; 
-            
             x_3_n = 7;
             y_3_n = 0; 
-            
             x_4_n = 0;
             y_4_n = 0; 
         end
@@ -1149,16 +1047,11 @@ always@(*)begin
             bias_cnt_n = bias_cnt;
             
             x_n = 7;
-            y_n = 0;
-        
+            y_n = 0; 
             x_2_n = 1;
             y_2_n = 0;
-
-
             x_3_n = 7;
             y_3_n = 0; 
-
-            
             x_4_n = 0;
             y_4_n = 0; 
         end
@@ -1168,30 +1061,25 @@ always@(*)begin
             valid_n_conv2 = 0;
             valid_n_conv3 = 0;
          
-            ker_cnt_n = (!conv3) ? (ker_cnt != 3) ? ker_cnt + 1 : 0 : (ker_cnt != 11) ? ker_cnt + 1 : 0;
-            //ker_cnt_n = ker_cnt + 1;
             in_cnt_n = in_cnt - 1;
             wordmask_cnt_n = (in_cnt == 1 && x == size && y == size)? wordmask_cnt + 1 : wordmask_cnt;
             if(!conv3)begin
+                ker_cnt_n = (ker_cnt != 3) ? ker_cnt + 1 : 0;
                 bias_cnt_n = (in_cnt == 2 && x_2 == 0 && y_2 == 0)? bias_cnt + 1 : bias_cnt ; 
             end
             else begin
+                ker_cnt_n = (ker_cnt != 11) ? ker_cnt + 1 : 0;
                 bias_cnt_n = (in_cnt == 2 && x_4 == 0 && y_4 == 0 && depth_cnt == 0)? bias_cnt + 1 : bias_cnt ; 
             end
+
             x_n = (in_cnt == 1) ? (x != size)? x+1 : 0 :x;
-            y_n = (x == size & in_cnt == 1) ? (y != size)? y+1 : 0 : y;
-            
+            y_n = (x == size & in_cnt == 1) ? (y != size)? y+1 : 0 : y;      
             x_2_n = (in_cnt == 2) ? (x_2 != size)? x_2+1 : 0 : x_2;
             y_2_n = (in_cnt == 2 && x_2 == size)? (y_2 != size)? y_2+1 : 0  : y_2;
-
-
             x_3_n = (in_cnt == 1 && depth_cnt == 2) ? (x_3 != size)? x_3 + 1 : 0 : x_3;
             y_3_n = (x_3 == size && in_cnt == 1 && depth_cnt == 2) ? (y_3 != size)? y_3+1:0:y_3; 
-        
-        
             x_4_n = (in_cnt == 2 && depth_cnt == 2) ? (x_4 != size)? x_4+1 : 0 : x_4;
-            y_4_n = (in_cnt == 2 && x_4 == size && depth_cnt == 2) ? (y_2 != size)? y_4+1 : 0  : y_4;
-            
+            y_4_n = (in_cnt == 2 && x_4 == size && depth_cnt == 2) ? (y_2 != size)? y_4+1 : 0  : y_4;          
         end
         FINISH:begin
             state_n = RESET;
@@ -1202,22 +1090,17 @@ always@(*)begin
             
             ker_cnt_n = 0;
             in_cnt_n = 0;
-            
             wordmask_cnt_n = 0;
             bias_cnt_n = 0;
-            
+
             x_n = 0;
             y_n = 0;
-            
             x_2_n = 0;
-            y_2_n = 0;
-            
+            y_2_n = 0;  
             x_3_n = 0;
-            y_3_n = 0;
-            
+            y_3_n = 0; 
             x_4_n = 0;
             y_4_n = 0;
-
         end
         RESET:begin
             state_n = (reset_cnt == 2)? IDLE : RESET;
@@ -1227,19 +1110,15 @@ always@(*)begin
             
             ker_cnt_n = 0;
             in_cnt_n = 2;
-            
             wordmask_cnt_n = 0;
             bias_cnt_n = 0;
             
             x_n = 0;
-            y_n = 0;
-            
+            y_n = 0; 
             x_2_n = 0;
             y_2_n = 0;
-
             x_3_n = 0;
             y_3_n = 0;
-            
             x_4_n = 0;
             y_4_n = 0;
         end
@@ -1249,22 +1128,17 @@ always@(*)begin
             valid_n_conv2 = 0;
             valid_n_conv3 = 0;
             
-            
             ker_cnt_n = 0;
             in_cnt_n = 0;
-            
             wordmask_cnt_n = 0;
             bias_cnt_n = 0;
             
             x_n = 0;
             y_n = 0;
-            
             x_2_n = 0;
             y_2_n = 0;
-        
             x_3_n = 0;
             y_3_n = 0;
-            
             x_4_n = 0;
             y_4_n = 0;
         end
