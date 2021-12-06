@@ -240,10 +240,10 @@ part2_U0(
 .sram_raddr_a2_n(sram_raddr_a2_n),
 .sram_raddr_a3_n(sram_raddr_a3_n),
 
-.sram_rdata_a0_d(sram_rdata_a0_d),
-.sram_rdata_a1_d(sram_rdata_a1_d),
-.sram_rdata_a2_d(sram_rdata_a2_d),
-.sram_rdata_a3_d(sram_rdata_a3_d),
+.sram_rdata_a0_d(sram_rdata_a0),
+.sram_rdata_a1_d(sram_rdata_a1),
+.sram_rdata_a2_d(sram_rdata_a2),
+.sram_rdata_a3_d(sram_rdata_a3),
 
 .valid_n(valid_n_part2),
 .sram_wen_b0_n(sram_wen_b0_n),
